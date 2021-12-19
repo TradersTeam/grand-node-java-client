@@ -42,7 +42,7 @@ public class GrandNodeClient {
         retrofit = retrofit.newBuilder().client(okHttpClient).build();
 
         var retrofitBuilder = retrofit.newBuilder();
-        retrofitBuilder.addCallAdapterFactory(new CallXAdapterFactory());
+        retrofitBuilder.addCallAdapterFactory(new CallXAdapterFactory(okHttpClient));
         for (Converter.Factory converter : converters)
             retrofitBuilder.addConverterFactory(converter);
         retrofit = retrofitBuilder.build();

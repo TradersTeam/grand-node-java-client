@@ -4,20 +4,25 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okio.Timeout;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import retrofit2.*;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class CallXAdapterFactory extends CallAdapter.Factory {
 
+    private static OkHttpClient okHttpClient = null;
+
+    public CallXAdapterFactory(OkHttpClient okHttpClient) {
+        CallXAdapterFactory.okHttpClient = okHttpClient;
+    }
+
     @Override
-    public CallAdapter<?, ?> get(Type type, Annotation[] annotations, Retrofit retrofit) {
+    public CallAdapter<?, ?> get(@NotNull Type type, Annotation @NotNull [] annotations, @NotNull Retrofit retrofit) {
         //this line will allow retrofit to use default call adapter for types other than CallX
         if (getRawType(type) != CallX.class) return null;
 
@@ -47,7 +52,7 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
         }
     }
 
-    static class MyCallXAdapter<T> implements CallX<T> {
+    private static class MyCallXAdapter<T> implements CallX<T> {
         private final Call<T> call;
 
         MyCallXAdapter(Call<T> call) {
@@ -55,12 +60,12 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
         }
 
         @Override
-        public Response<T> execute() throws IOException {
+        public @NotNull Response<T> execute() throws IOException {
             return call.execute();
         }
 
         @Override
-        public void enqueue(Callback<T> callback) {
+        public void enqueue(@NotNull Callback<T> callback) {
             call.enqueue(callback);
         }
 
@@ -80,25 +85,25 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
         }
 
         @Override
-        public Call<T> clone() {
+        public @NotNull Call<T> clone() {
             return new MyCallXAdapter<>(call.clone());
         }
 
         @Override
-        public Request request() {
+        public @NotNull Request request() {
             return call.request();
         }
 
         @Override
-        public Timeout timeout() {
+        public @NotNull Timeout timeout() {
             return call.timeout();
         }
 
         @Override
-        public void async(OkHttpClient okHttpClient, BiFunction<Response<T>, Throwable, Boolean> callback) {
+        public void async(BiFunction<Response<T>, Throwable, Boolean> callback) {
             call.enqueue(new Callback<>() {
                 @Override
-                public void onResponse(Call<T> call, Response<T> response) {
+                public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
                     var isShutdownNeeded = false;
 
                     if (call.isCanceled())
@@ -107,16 +112,40 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
                         isShutdownNeeded = callback.apply(response, null);
 
                     if (isShutdownNeeded)
-                        shutdown(okHttpClient);
+                        shutdown();
                 }
 
                 @Override
-                public void onFailure(Call<T> call, Throwable t) {
+                public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
                     var isShutdownNeeded = false;
 
                     isShutdownNeeded = callback.apply(null, t);
                     if (isShutdownNeeded)
-                        shutdown(okHttpClient);
+                        shutdown();
+                }
+            });
+        }
+
+        @Override
+        public void async(boolean isShutdownNeeded, Consumer<Response<T>> onSuccess, Consumer<Throwable> onFailure) {
+            call.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
+                    if (call.isCanceled())
+                        onFailure.accept(new IOException("Canceled"));
+                    else
+                        onSuccess.accept(response);
+
+                    if (isShutdownNeeded)
+                        shutdown();
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
+                    onFailure.accept(t);
+
+                    if (isShutdownNeeded)
+                        shutdown();
                 }
             });
         }
@@ -126,7 +155,7 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
          * this will prevent the JVM from exiting until they time out.
          * so this method is used for shutting down threads manually.
          */
-        private void shutdown(@Nullable OkHttpClient okHttpClient) {
+        private void shutdown() {
             if (okHttpClient != null) {
                 okHttpClient.dispatcher().executorService().shutdown();
                 okHttpClient.connectionPool().evictAll();

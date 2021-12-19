@@ -90,3 +90,5 @@ lint/tmp/
 /build/
 /src/main/java/io/githhub/TradersTeam/grand_node_java_client/Test.java
 >>>>>>> 902d638 (init commit)
+/src/main/java/io/githhub/TradersTeam/grand_node_java_client/TestK.kt
+/src/main/java/io/githhub/TradersTeam/grand_node_java_client/network/util/ApiKeys.java
