@@ -1,4 +1,4 @@
-package io.githhub.TradersTeam.grand_node_java_client.network.util;
+package io.githhub.TradersTeam.grand_node_java_client.network;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -14,7 +14,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class CallXAdapterFactory extends CallAdapter.Factory {
+class CallXAdapterFactory extends CallAdapter.Factory {
 
     private static OkHttpClient okHttpClient;
     private static Executor callbackExecutor;
@@ -74,7 +74,7 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
 
         @Override
         public void enqueue(@NotNull Callback<T> callback) {
-            call.enqueue(callback);
+            callbackExecutor.execute(() -> call.enqueue(callback));
         }
 
         @Override

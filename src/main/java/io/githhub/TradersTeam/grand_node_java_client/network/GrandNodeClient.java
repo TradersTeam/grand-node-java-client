@@ -1,7 +1,5 @@
 package io.githhub.TradersTeam.grand_node_java_client.network;
 
-import io.githhub.TradersTeam.grand_node_java_client.network.util.CallXAdapterFactory;
-import io.githhub.TradersTeam.grand_node_java_client.network.util.Constants;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;

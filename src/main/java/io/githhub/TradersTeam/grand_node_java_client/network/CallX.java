@@ -1,4 +1,4 @@
-package io.githhub.TradersTeam.grand_node_java_client.network.util;
+package io.githhub.TradersTeam.grand_node_java_client.network;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

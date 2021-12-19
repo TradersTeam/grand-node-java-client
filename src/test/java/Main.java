@@ -1,16 +1,16 @@
-package io.githhub.TradersTeam.grand_node_java_client;
-
 import io.githhub.TradersTeam.grand_node_java_client.network.GrandNodeClient;
 import io.githhub.TradersTeam.grand_node_java_client.network.apis.TestApi;
-import io.githhub.TradersTeam.grand_node_java_client.network.util.ApiKeys;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-public class Main {
+class Main {
     public static void main(String... args) {
         System.out.println("Hello, World!");
 
+        @SuppressWarnings("SpellCheckingInspection")
+        var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNjcwNmE2Yy1jZDE0LTQwNWYtOTdkOC01YWJjYmZhYjljNmIiLCJFbWFpbCI6InlhbWluODAwMEB5YWhvby5jb20iLCJUb2tlbiI6IjE3Yzk5NWU5LTNhZTAtNGU5Mi05ZDIwLTk1MTYwNDUzMmYyOCIsImV4cCI6MTcyNjI4OTg4NX0._CD3jFSsMz1_-eiN2LcK1sAEFY69ZDhRP1DBRuoMRN4";
+
         var client = GrandNodeClient.builder()
-                .apiKey(ApiKeys.token)
+                .apiKey(token)
                 .converter(ScalarsConverterFactory.create())
                 .build()
                 .createDefaultInstance();
