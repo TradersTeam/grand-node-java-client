@@ -14,6 +14,7 @@ import retrofit2.Retrofit;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Builder
 @Getter
@@ -26,6 +27,7 @@ public class GrandNodeClient {
     private List<Converter.Factory> converters;
     private boolean isClientAutoShutDowned;
     private String apiKey;
+    private Executor callbackExecutor;
 
     public GrandNodeClient createDefaultInstance() {
         if (baseUrl == null)
@@ -42,12 +44,25 @@ public class GrandNodeClient {
         retrofit = retrofit.newBuilder().client(okHttpClient).build();
 
         var retrofitBuilder = retrofit.newBuilder();
-        retrofitBuilder.addCallAdapterFactory(new CallXAdapterFactory(okHttpClient));
+
+        CallXAdapterFactory callXAdapterFactory = getCallXAdapterFactory();
+        retrofitBuilder.addCallAdapterFactory(callXAdapterFactory);
+
         for (Converter.Factory converter : converters)
             retrofitBuilder.addConverterFactory(converter);
+
         retrofit = retrofitBuilder.build();
 
         return this;
+    }
+
+    @NotNull
+    private CallXAdapterFactory getCallXAdapterFactory() {
+        CallXAdapterFactory callXAdapterFactory;
+        if (callbackExecutor != null)
+            callXAdapterFactory = new CallXAdapterFactory(okHttpClient, callbackExecutor);
+        else callXAdapterFactory = new CallXAdapterFactory(okHttpClient);
+        return callXAdapterFactory;
     }
 
     private @NotNull Response ApiInterceptor(Interceptor.Chain chain) throws IOException {

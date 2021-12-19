@@ -10,15 +10,23 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CallXAdapterFactory extends CallAdapter.Factory {
 
-    private static OkHttpClient okHttpClient = null;
+    private static OkHttpClient okHttpClient;
+    private static Executor callbackExecutor;
 
     public CallXAdapterFactory(OkHttpClient okHttpClient) {
         CallXAdapterFactory.okHttpClient = okHttpClient;
+        callbackExecutor = okHttpClient.dispatcher().executorService();
+    }
+
+    public CallXAdapterFactory(OkHttpClient okHttpClient, Executor callbackExecutor) {
+        CallXAdapterFactory.okHttpClient = okHttpClient;
+        CallXAdapterFactory.callbackExecutor = callbackExecutor;
     }
 
     @Override
@@ -104,24 +112,28 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
             call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
-                    var isShutdownNeeded = false;
+                    callbackExecutor.execute(() -> {
+                        var isShutdownNeeded = false;
 
-                    if (call.isCanceled())
-                        isShutdownNeeded = callback.apply(null, new IOException("Canceled"));
-                    else
-                        isShutdownNeeded = callback.apply(response, null);
+                        if (call.isCanceled())
+                            isShutdownNeeded = callback.apply(null, new IOException("Canceled"));
+                        else
+                            isShutdownNeeded = callback.apply(response, null);
 
-                    if (isShutdownNeeded)
-                        shutdown();
+                        if (isShutdownNeeded)
+                            shutdown();
+                    });
                 }
 
                 @Override
                 public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
-                    var isShutdownNeeded = false;
+                    callbackExecutor.execute(() -> {
+                        var isShutdownNeeded = false;
 
-                    isShutdownNeeded = callback.apply(null, t);
-                    if (isShutdownNeeded)
-                        shutdown();
+                        isShutdownNeeded = callback.apply(null, t);
+                        if (isShutdownNeeded)
+                            shutdown();
+                    });
                 }
             });
         }
@@ -131,21 +143,25 @@ public class CallXAdapterFactory extends CallAdapter.Factory {
             call.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
-                    if (call.isCanceled())
-                        onFailure.accept(new IOException("Canceled"));
-                    else
-                        onSuccess.accept(response);
+                    callbackExecutor.execute(() -> {
+                        if (call.isCanceled())
+                            onFailure.accept(new IOException("Canceled"));
+                        else
+                            onSuccess.accept(response);
 
-                    if (isShutdownNeeded)
-                        shutdown();
+                        if (isShutdownNeeded)
+                            shutdown();
+                    });
                 }
 
                 @Override
                 public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
-                    onFailure.accept(t);
+                    callbackExecutor.execute(() -> {
+                        onFailure.accept(t);
 
-                    if (isShutdownNeeded)
-                        shutdown();
+                        if (isShutdownNeeded)
+                            shutdown();
+                    });
                 }
             });
         }
