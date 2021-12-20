@@ -23,7 +23,7 @@ shadowJar {
 apply plugin: "com.vanniktech.maven.publish"
 
 group 'io.github.TradersTeam'
-version '1.0.2'
+version '1.0.3'
 
 allprojects {
     repositories {
