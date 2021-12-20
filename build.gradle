@@ -47,7 +47,6 @@ dependencies {
     //retrofit
     def retrofit_version = '2.9.0'
     api "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
     //project lombok
     def lombok_version = '1.18.22'
     compileOnly "org.projectlombok:lombok:$lombok_version"
