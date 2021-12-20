@@ -130,7 +130,13 @@ class CallXAdapterFactory extends CallAdapter.Factory {
                     callbackExecutor.execute(() -> {
                         var isShutdownNeeded = false;
 
-                        isShutdownNeeded = callback.apply(null, t);
+                        Throwable throwable;
+                        if (call.isCanceled())
+                            throwable = new IOException("Canceled");
+                        else throwable = t;
+
+                        isShutdownNeeded = callback.apply(null, throwable);
+
                         if (isShutdownNeeded)
                             shutdown();
                     });
