@@ -1,6 +1,6 @@
 # GrandNode2 Java Client
 
-**GrandNode2 API Client JVM Library**
+**a JVM Client for GrandNode2 API**
 
 ---
 
