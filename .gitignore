@@ -94,3 +94,5 @@ lint/tmp/
 /src/main/java/io/githhub/TradersTeam/grand_node_java_client/network/util/ApiKeys.java
 /gpg-keys/
 /gradle.properties
+/example-kotlin/src/main/kotlin/API.kt
+/example-java/src/main/java/API.java

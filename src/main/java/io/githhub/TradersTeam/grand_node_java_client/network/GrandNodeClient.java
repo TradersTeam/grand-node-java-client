@@ -28,9 +28,6 @@ public class GrandNodeClient {
     private Executor callbackExecutor;
 
     public GrandNodeClient createDefaultInstance() {
-        if (baseUrl == null)
-            baseUrl = Constants.baseUrl;
-
         if (okHttpClient == null)
             okHttpClient = new OkHttpClient.Builder().build();
 

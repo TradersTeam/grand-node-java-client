@@ -4,11 +4,9 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 class Test {
     public static void main(String... args) {
-        @SuppressWarnings("SpellCheckingInspection")
-        var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNjcwNmE2Yy1jZDE0LTQwNWYtOTdkOC01YWJjYmZhYjljNmIiLCJFbWFpbCI6InlhbWluODAwMEB5YWhvby5jb20iLCJUb2tlbiI6IjE3Yzk5NWU5LTNhZTAtNGU5Mi05ZDIwLTk1MTYwNDUzMmYyOCIsImV4cCI6MTcyNjI4OTg4NX0._CD3jFSsMz1_-eiN2LcK1sAEFY69ZDhRP1DBRuoMRN4";
-
         var test = GrandNodeClient.builder()
-                .apiKey(token)
+                .apiKey(API.token)
+                .baseUrl(API.url)
                 .converter(ScalarsConverterFactory.create())
                 .build()
                 .createDefaultInstance();

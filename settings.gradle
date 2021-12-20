@@ -1,2 +1,4 @@
 rootProject.name = 'grand-node-java-client'
+include 'example-java'
+include 'example-kotlin'
 
