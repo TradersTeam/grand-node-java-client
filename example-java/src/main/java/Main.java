@@ -4,7 +4,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 class Main {
     public static void main(String... args) {
-        System.out.println("Hello, World!");
+        Output.message("Hello, World!");
 
         var client = GrandNodeClient.builder()
                 .apiKey(API.token)
@@ -13,12 +13,12 @@ class Main {
                 .build()
                 .createDefaultInstance();
 
-        client.getRetrofit().create(BrandAPIs.class).getAll().atomicAsync(listResponse -> {
-            if (listResponse != null) {
-                System.out.println(listResponse);
-            } else System.out.println("response is null");
-        }, throwable -> {
-            System.out.println(throwable.getMessage());
-        });
+        client.create(BrandAPIs.class).getAll().atomicAsync(listResponse -> {
+                    if (listResponse != null)
+                        Output.success(listResponse.body().get(0).getName());
+                    else Output.error("response is null");
+                }, throwable ->
+                        Output.error(throwable.getMessage())
+        );
     }
 }

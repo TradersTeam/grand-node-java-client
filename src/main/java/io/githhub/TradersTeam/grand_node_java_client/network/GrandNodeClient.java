@@ -65,4 +65,8 @@ public class GrandNodeClient {
         requestBuilder = requestBuilder.addHeader(Constants.AUTHORIZATION, Constants.BEARER + " " + apiKey);
         return chain.proceed(requestBuilder.build());
     }
+
+    public <T> T create(Class<T> modelClass) {
+        return retrofit.create(modelClass);
+    }
 }
