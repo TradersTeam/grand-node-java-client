@@ -11,22 +11,23 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 class CallXAdapterFactory extends CallAdapter.Factory {
 
-    private static OkHttpClient okHttpClient;
-    private static Executor callbackExecutor;
+    private final OkHttpClient okHttpClient;
+    private final Executor callbackExecutor;
 
     public CallXAdapterFactory(OkHttpClient okHttpClient) {
-        CallXAdapterFactory.okHttpClient = okHttpClient;
+        this.okHttpClient = okHttpClient;
         callbackExecutor = okHttpClient.dispatcher().executorService();
     }
 
     public CallXAdapterFactory(OkHttpClient okHttpClient, Executor callbackExecutor) {
-        CallXAdapterFactory.okHttpClient = okHttpClient;
-        CallXAdapterFactory.callbackExecutor = callbackExecutor;
+        this.okHttpClient = okHttpClient;
+        this.callbackExecutor = callbackExecutor;
     }
 
     @Override
@@ -34,19 +35,22 @@ class CallXAdapterFactory extends CallAdapter.Factory {
         //this line will allow retrofit to use default call adapter for types other than CallX
         if (getRawType(type) != CallX.class) return null;
 
-        if (!(type instanceof ParameterizedType)) {
+        if (!(type instanceof ParameterizedType))
             throw new IllegalStateException("Call must have generic type (e.g., Call<ResponseBody>)");
-        }
 
         final Type responseType = getParameterUpperBound(0, (ParameterizedType) type);
-        return new CallXAdapter<>(responseType);
+        return new CallXAdapter<>(responseType, okHttpClient, callbackExecutor);
     }
 
     private static final class CallXAdapter<R> implements CallAdapter<R, CallX<R>> {
         private final Type responseType;
+        private final OkHttpClient okHttpClient;
+        private final Executor callbackExecutor;
 
-        CallXAdapter(Type responseType) {
+        CallXAdapter(Type responseType, OkHttpClient okHttpClient, Executor callbackExecutor) {
             this.responseType = responseType;
+            this.okHttpClient = okHttpClient;
+            this.callbackExecutor = callbackExecutor;
         }
 
         @Override
@@ -56,15 +60,19 @@ class CallXAdapterFactory extends CallAdapter.Factory {
 
         @Override
         public @NotNull CallX<R> adapt(@NotNull Call<R> call) {
-            return new MyCallXAdapter<>(call);
+            return new MyCallXAdapter<>(call, okHttpClient, callbackExecutor);
         }
     }
 
     private static class MyCallXAdapter<T> implements CallX<T> {
         private final Call<T> call;
+        private final OkHttpClient okHttpClient;
+        private final Executor callbackExecutor;
 
-        MyCallXAdapter(Call<T> call) {
+        MyCallXAdapter(Call<T> call, OkHttpClient okHttpClient, Executor callbackExecutor) {
             this.call = call;
+            this.okHttpClient = okHttpClient;
+            this.callbackExecutor = callbackExecutor;
         }
 
         @Override
@@ -94,7 +102,7 @@ class CallXAdapterFactory extends CallAdapter.Factory {
 
         @Override
         public @NotNull Call<T> clone() {
-            return new MyCallXAdapter<>(call.clone());
+            return new MyCallXAdapter<>(call.clone(), okHttpClient, callbackExecutor);
         }
 
         @Override
@@ -108,6 +116,21 @@ class CallXAdapterFactory extends CallAdapter.Factory {
         }
 
         @Override
+        public void enqueue(@NotNull BiConsumer<Call<T>, Response<T>> onResponse, @NotNull BiConsumer<Call<T>, Throwable> onFailure) {
+            callbackExecutor.execute(() -> call.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NotNull Call<T> call, @NotNull Response<T> response) {
+                    callbackExecutor.execute(() -> onResponse.accept(call, response));
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<T> call, @NotNull Throwable t) {
+                    callbackExecutor.execute(() -> onFailure.accept(call, t));
+                }
+            }));
+        }
+
+        @Override
         public void async(BiFunction<Response<T>, Throwable, Boolean> callback) {
             call.enqueue(new Callback<>() {
                 @Override
@@ -117,11 +140,9 @@ class CallXAdapterFactory extends CallAdapter.Factory {
 
                         if (call.isCanceled())
                             isShutdownNeeded = callback.apply(null, new IOException("Canceled"));
-                        else
-                            isShutdownNeeded = callback.apply(response, null);
+                        else isShutdownNeeded = callback.apply(response, null);
 
-                        if (isShutdownNeeded)
-                            shutdown();
+                        if (isShutdownNeeded) shutdown(okHttpClient);
                     });
                 }
 
@@ -130,15 +151,9 @@ class CallXAdapterFactory extends CallAdapter.Factory {
                     callbackExecutor.execute(() -> {
                         var isShutdownNeeded = false;
 
-                        Throwable throwable;
-                        if (call.isCanceled())
-                            throwable = new IOException("Canceled");
-                        else throwable = t;
+                        isShutdownNeeded = callback.apply(null, t);
 
-                        isShutdownNeeded = callback.apply(null, throwable);
-
-                        if (isShutdownNeeded)
-                            shutdown();
+                        if (isShutdownNeeded) shutdown(okHttpClient);
                     });
                 }
             });
@@ -152,11 +167,9 @@ class CallXAdapterFactory extends CallAdapter.Factory {
                     callbackExecutor.execute(() -> {
                         if (call.isCanceled())
                             onFailure.accept(new IOException("Canceled"));
-                        else
-                            onSuccess.accept(response);
+                        else onSuccess.accept(response);
 
-                        if (isShutdownNeeded)
-                            shutdown();
+                        if (isShutdownNeeded) shutdown(okHttpClient);
                     });
                 }
 
@@ -165,8 +178,7 @@ class CallXAdapterFactory extends CallAdapter.Factory {
                     callbackExecutor.execute(() -> {
                         onFailure.accept(t);
 
-                        if (isShutdownNeeded)
-                            shutdown();
+                        if (isShutdownNeeded) shutdown(okHttpClient);
                     });
                 }
             });
@@ -176,8 +188,10 @@ class CallXAdapterFactory extends CallAdapter.Factory {
          * By default, OkHttp uses non-daemon thread,
          * this will prevent the JVM from exiting until they time out.
          * so this method is used for shutting down threads manually.
+         * <p>
+         * This method is not necessary if Platform is Android.
          */
-        private void shutdown() {
+        private void shutdown(OkHttpClient okHttpClient) {
             if (okHttpClient != null) {
                 okHttpClient.dispatcher().executorService().shutdown();
                 okHttpClient.connectionPool().evictAll();
