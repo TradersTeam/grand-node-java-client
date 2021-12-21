@@ -6,6 +6,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class IEdmTypeReference {
-    private boolean isNullable;
-    private IEdmType iEdmType;
+    private boolean IsNullable;
+    private IEdmType IEdmType;
 }
