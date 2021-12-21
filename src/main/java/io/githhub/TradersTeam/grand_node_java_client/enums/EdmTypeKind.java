@@ -12,7 +12,7 @@ public enum EdmTypeKind {
     Untyped(8),
     Path(9);
 
-    int value;
+    final int value;
 
     EdmTypeKind(int value) {
         this.value = value;

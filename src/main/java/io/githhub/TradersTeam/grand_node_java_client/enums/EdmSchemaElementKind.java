@@ -8,7 +8,7 @@ public enum EdmSchemaElementKind {
     EntityContainer(4),
     Function(5);
 
-    int value;
+    final int value;
 
     EdmSchemaElementKind(int value) {
         this.value = value;

@@ -28,7 +28,7 @@ public enum EdmExpressionKind {
     EnumMember(24),
     AnnotationPath(25);
 
-    int value;
+    final int value;
 
     EdmExpressionKind(int value) {
         this.value = value;
