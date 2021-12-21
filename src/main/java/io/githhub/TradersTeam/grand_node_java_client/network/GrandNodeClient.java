@@ -31,7 +31,7 @@ public class GrandNodeClient {
         if (okHttpClient == null)
             okHttpClient = new OkHttpClient.Builder().build();
 
-        okHttpClient = okHttpClient.newBuilder().addInterceptor(this::ApiInterceptor).build();
+        okHttpClient = okHttpClient.newBuilder().addInterceptor(this::apiInterceptor).build();
 
         if (retrofit == null)
             retrofit = new Retrofit.Builder().baseUrl(baseUrl).build();
@@ -60,7 +60,7 @@ public class GrandNodeClient {
         return callXAdapterFactory;
     }
 
-    private @NotNull Response ApiInterceptor(Interceptor.Chain chain) throws IOException {
+    private @NotNull Response apiInterceptor(Interceptor.Chain chain) throws IOException {
         var requestBuilder = chain.request().newBuilder();
         requestBuilder = requestBuilder.addHeader(Constants.AUTHORIZATION, Constants.BEARER + " " + apiKey);
         return chain.proceed(requestBuilder.build());

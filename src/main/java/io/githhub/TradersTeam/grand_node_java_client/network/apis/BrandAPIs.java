@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface BrandAPIs {
 
-    @GET(R.ODATA + "Brand")
+    String BRAND = "Brand";
+
+    @GET(R.ODATA + BRAND)
     CallX<List<Brand>> getAll();
 
-    @POST(R.ODATA + "Brand")
+    @POST(R.ODATA + BRAND)
     CallX<Brand> create(@Body Brand brand);
 }
