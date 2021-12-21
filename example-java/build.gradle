@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'io.github.TradersTeam'
-version '1.0.2'
+version rootProject.version
 
 repositories {
     mavenCentral()

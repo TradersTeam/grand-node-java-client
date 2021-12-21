@@ -11,6 +11,7 @@ public class Brand {
     private String SeName;
     private String Description;
     private String BottomDescription;
+    private String BrandLayoutId;
     private String MetaKeywords;
     private String MetaDescription;
     private String MetaTitle;
