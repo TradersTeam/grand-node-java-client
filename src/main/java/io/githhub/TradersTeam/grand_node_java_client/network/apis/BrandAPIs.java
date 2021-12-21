@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface BrandAPIs {
 
-    @GET("brand")
+    @GET(R.ODATA + "Brand")
     CallX<List<Brand>> getAll();
 }
