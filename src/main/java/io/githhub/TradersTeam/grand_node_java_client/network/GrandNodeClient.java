@@ -66,7 +66,7 @@ public class GrandNodeClient {
         return chain.proceed(requestBuilder.build());
     }
 
-    public <T> T create(Class<T> modelClass) {
-        return retrofit.create(modelClass);
+    public <T> T create(Class<T> serviceClass) {
+        return retrofit.create(serviceClass);
     }
 }
