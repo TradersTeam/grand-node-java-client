@@ -1,4 +1,4 @@
-package io.githhub.TradersTeam.grand_node_java_client.model;
+package io.githhub.TradersTeam.grand_node_java_client.models;
 
 import io.githhub.TradersTeam.grand_node_java_client.enums.EdmTypeKind;
 import lombok.Builder;
