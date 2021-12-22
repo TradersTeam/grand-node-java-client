@@ -56,4 +56,13 @@ public interface BrandAPIs {
      */
     @GET(R.ODATA + BRAND + "/{key}")
     CallX<List<Brand>> get(@NotNull @Path("key") String key);
+
+    /**
+     * Delete a brand by id
+     *
+     * @param key brand id
+     * @return If the brand was found and deleted HTTP response code is 200 and if the brand was not found HTTP response code is 404
+     */
+    @DELETE(R.ODATA + BRAND)
+    CallX<Void> delete(@NotNull @Query("key") String key);
 }

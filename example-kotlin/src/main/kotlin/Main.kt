@@ -3,6 +3,7 @@ import io.githhub.TradersTeam.grand_node_java_client.network.GrandNodeClient
 import io.githhub.TradersTeam.grand_node_java_client.network.apis.BrandAPIs
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
+import java.util.*
 
 fun main() {
     val client = GrandNodeClient.builder()
@@ -13,10 +14,19 @@ fun main() {
         .createDefaultInstance()
 
     val api = client.retrofit.create(BrandAPIs::class.java)
-    val response = api.search(null, null, null, null, "contains(Name,'X')").execute()
-    println(response.code())
+    val response = api.all.execute().body()!!.last()
+    println("Brand: ${response.seName} - ${response.id}")
+    val scanner = Scanner(System.`in`)
+    val input = scanner.nextLine()
+    if (input == "y") {
+        api.delete("response.id").enqueue({ _, deleteResponse ->
+            println(deleteResponse.code())
+        }, { _, t ->
+            println(t.message)
+        })
+    }
 
-    //createBrand(client)
+//createBrand(client)
 
 //    api.async { response, throwable ->
 //        println(response?.body()?.first()?.name)
