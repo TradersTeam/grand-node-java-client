@@ -12,8 +12,8 @@ fun main() {
         .build()
         .createDefaultInstance()
 
-    val api = client.retrofit.create(BrandAPIs::class.java).get("61b57b85892acc894cd7f02f")
-    val response = api.execute()
+    val api = client.retrofit.create(BrandAPIs::class.java)
+    val response = api.search(null, null, null, null, "contains(Name,'X')").execute()
     println(response.code())
 
     //createBrand(client)
