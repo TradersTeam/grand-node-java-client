@@ -12,9 +12,11 @@ fun main() {
         .build()
         .createDefaultInstance()
 
-    val api = client.retrofit.create(BrandAPIs::class.java).all
+    val api = client.retrofit.create(BrandAPIs::class.java).get("61b57b85892acc894cd7f02f")
+    val response = api.execute()
+    println(response.code())
 
-    createBrand(client)
+    //createBrand(client)
 
 //    api.async { response, throwable ->
 //        println(response?.body()?.first()?.name)
