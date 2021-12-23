@@ -65,4 +65,13 @@ public interface BrandAPIs {
      */
     @DELETE(R.ODATA + BRAND)
     CallX<Void> delete(@NotNull @Query("key") String key);
+
+    /**
+     * Update a brand
+     *
+     * @param brand brand entity
+     * @return updated brand entity
+     */
+    @PUT(R.ODATA + BRAND)
+    CallX<Brand> update(@NotNull @Body Brand brand);
 }
