@@ -1,10 +1,9 @@
 package io.githhub.TradersTeam.grand_node_java_client.network.apis;
 
-import io.githhub.TradersTeam.grand_node_java_client.models.Brand;
 import io.githhub.TradersTeam.grand_node_java_client.models.Category;
 import io.githhub.TradersTeam.grand_node_java_client.network.CallX;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
+import org.jetbrains.annotations.NotNull;
+import retrofit2.http.*;
 
 import java.util.List;
 
@@ -40,4 +39,30 @@ public interface CategoryAPIs {
         return search(null, null, null, null, null);
     }
 
+    /**
+     * Create a new category entity
+     *
+     * @param category category entity
+     * @return created category entity
+     */
+    @POST(R.ODATA + CATEGORY)
+    CallX<Category> create(@NotNull @Body Category category);
+
+    /**
+     * Get a category by id
+     *
+     * @param key category id
+     * @return List of categories that only contains one category entity or null if not found
+     */
+    @GET(R.ODATA + CATEGORY + "/{key}")
+    CallX<List<Category>> get(@NotNull @Path("key") String key);
+
+    /**
+     * Delete a category by id
+     *
+     * @param key category id
+     * @return If the category was found and deleted HTTP response code is 200 and if the category was not found HTTP response code is 404
+     */
+    @DELETE(R.ODATA + CATEGORY)
+    CallX<Void> delete(@NotNull @Query("key") String key);
 }
