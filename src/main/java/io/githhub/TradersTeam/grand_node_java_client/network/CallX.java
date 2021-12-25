@@ -221,7 +221,7 @@ public interface CallX<T> extends Call<T> {
     }
 
     /**
-     * Calls {@link #enqueueAsync(Consumer, Consumer)} and definitely returns a Non Null response body,
+     * Calls {@link #enqueueAsync(Consumer, Consumer)} and definitely returns a Non-Null response body,
      * Actually if response body is null then default value provided by defaultValueSupplier is returned.
      *
      * @param onSuccess            The callback function which is called when an HTTP response is received and is not canceled.
