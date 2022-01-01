@@ -2,11 +2,13 @@ package io.githhub.TradersTeam.grand_node_java_client.models;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Builder
+@Setter
 public class Customer {
     private String CustomerGuid; //uuid
     private String Username;
