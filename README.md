@@ -40,9 +40,9 @@ with some additional methods so this is an aspect of the library that is not cus
 
 ### Quick Guide
 
-1. Create a client instance from `GrandNodeClient` class and customize it if you want with the help of `builder` method.
+1. Create a client instance from `GrandNodeClient` class and customize it if you want with the help of the `builder` method.
 2. Create a service instance related to the API you want to use by calling `create` method on the client.
-3. Call the service's methods(different type of API calls defined for each API service).
+3. Call the service's methods(different types of API calls defined for each API service).
 4. Handle the response using various callbacks that are provided by `Retrofit` and other custom callbacks(`CallX`).
 
 ---
