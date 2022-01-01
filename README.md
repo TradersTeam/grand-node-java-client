@@ -151,6 +151,7 @@ dependencies {
 - 1.0.2 - WIP
 - 1.0.3 - WIP
 - 1.0.4 - WIP
+- 1.0.5 - WIP
 
 ## License
 
