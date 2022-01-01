@@ -36,7 +36,7 @@ with some additional methods so this is an aspect of the library that is not cus
 
 ## Usage
 
-[![javadoc](https://javadoc.io/badge2/io.github.TradersTeam/grand-node-java-client/javadoc.svg)](https://javadoc.io/doc/com.github.TradersTeam/grand-node-java-client)
+[![javadoc](https://javadoc.io/badge2/io.github.TradersTeam/grand-node-java-client/javadoc.svg)](https://javadoc.io/doc/io.github.TradersTeam/grand-node-java-client)
 
 ### Quick Guide
 
